@@ -19,3 +19,5 @@ _fetchUsers() - this function makes an HTTP GET request to the URL 'https://reqr
 The build() function returns a Scaffold with a ListView.builder widget. If _users is not null, it builds a Container for each user in the list. Each container displays the user's profile picture, name, and email. If _users is null, it displays a CircularProgressIndicator in the center of the screen.
 
 Overall, this code demonstrates how to fetch data from an API using the Dio package and display it in a ListView widget in a Flutter app.
+
++ Add Pagination
