@@ -37,109 +37,96 @@ class FetchUserList extends StatefulWidget {
 }
 
 class FetchUserListState extends State<FetchUserList> {
+// Initializing empty list of users
   late List<User> _users;
-  int _currentPage = 1; // track current page number
 
   @override
   void initState() {
     super.initState();
+// Initializing users list as empty
     _users = [];
-    _fetchUsers(_currentPage); // initial fetch with page 1
+// Fetching users from API
+    _fetchUsers();
   }
 
-  Future<void> _fetchUsers(int page) async {
+// Fetch users from API and update the state
+  Future<void> _fetchUsers() async {
     try {
-      final response = await Dio().get('https://reqres.in/api/users?page=$page');
+// Sending GET request to API
+      final response = await Dio().get('https://reqres.in/api/users?page=1');
+// Extracting data from response
       final data = response.data['data'] as List<dynamic>;
+// Converting data into List of User objects
       final users = data.map((e) => User.fromJson(e)).toList();
+// Updating state with users list
       setState(() {
-        _users.addAll(users); // add fetched users to existing list
+        _users = users;
       });
     } catch (e) {
+// Printing error to console if running in debug mode
       if (kDebugMode) {
         print(e);
       }
     }
   }
 
-  Future<void> _loadMoreUsers() async {
-    setState(() {
-      _currentPage++; // increment current page number
-    });
-    await _fetchUsers(_currentPage); // fetch users for new page
-  }
-
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      body: _users.isNotEmpty
-          ? NotificationListener<ScrollNotification>(
-        onNotification: (notification) {
-          if (notification is ScrollEndNotification) {
-            final maxScroll = notification.metrics.maxScrollExtent;
-            final currentScroll = notification.metrics.pixels;
-            final delta = MediaQuery.of(context).size.height * 0.20; // 20% of screen height
-            if (maxScroll - currentScroll <= delta) {
-              _loadMoreUsers(); // load more users when scroll reaches end
-            }
-          }
-          return true;
-        },
-        child: ListView.builder(
-          itemCount: _users.length + 1, // add one for loading indicator
-          itemBuilder: (context, index) {
-            if (index == _users.length) { // show loading indicator at end of list
-              return const Center(child: CircularProgressIndicator());
-            }
-            final user = _users[index];
-            return Container(
-              padding: const EdgeInsets.all(8.0),
-              color: Colors.blueGrey,
-              height: 150,
-              child: Row(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  SizedBox(
-                    width: 150,
-                    height: 150,
-                    child: Image.network(
-                      user.image,
-                      fit: BoxFit.cover,
-                    ),
-                  ),
-                  const SizedBox(width: 10),
-                  Expanded(
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      mainAxisAlignment: MainAxisAlignment.center,
-                      children: [
-                        Text(
-                          '${user.firstName} ${user.lastName}',
-                          style: const TextStyle(
-                            fontWeight: FontWeight.bold,
-                            fontSize: 24,
-                            color: Colors.lightBlue,
-                          ),
+      body: _users.isNotEmpty // Checking if users list is not empty
+          ? ListView.builder(
+              itemCount: _users.length,
+              itemBuilder: (context, index) {
+                final user = _users[index];
+                return Container(
+                  padding: const EdgeInsets.all(8.0),
+                  color: Colors.blueGrey,
+                  height: 150,
+                  child: Row(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      SizedBox(
+                        width: 150,
+                        height: 150,
+                        child: Image.network(
+                          user.image,
+                          fit: BoxFit.cover,
                         ),
-                        const SizedBox(height: 10),
-                        Text(
-                          user.email,
-                          style: const TextStyle(
-                            fontWeight: FontWeight.bold,
-                            fontSize: 20,
-                            color: Colors.deepOrangeAccent,
-                          ),
+                      ),
+                      const SizedBox(width: 10),
+                      Expanded(
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          mainAxisAlignment: MainAxisAlignment.center,
+                          children: [
+                            Text(
+                              '${user.firstName} ${user.lastName}',
+                              style: const TextStyle(
+                                fontWeight: FontWeight.bold,
+                                fontSize: 24,
+                                color: Colors.lightBlue,
+                              ),
+                            ),
+                            const SizedBox(height: 10),
+                            Text(
+                              user.email,
+                              style: const TextStyle(
+                                fontWeight: FontWeight.bold,
+                                fontSize: 20,
+                                color: Colors.deepOrangeAccent,
+                              ),
+                            ),
+                          ],
                         ),
-                      ],
-                    ),
+                      ),
+                    ],
                   ),
-                ],
-              ),
-            );
-          },
-        ),
-      )
-          : const Center(child: CircularProgressIndicator()),
+                );
+              },
+            )
+          : const Center(
+              child:
+                  CircularProgressIndicator()), // Showing progress indicator if users list is empty
     );
   }
 }
