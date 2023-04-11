@@ -125,8 +125,12 @@ class FetchUserListState extends State<FetchUserList> {
               },
             )
           : const Center(
-              child:
-                  CircularProgressIndicator()), // Showing progress indicator if users list is empty
+              child:Card(
+                color: Colors.amber,
+                child: Text('Loding...error..network..err..r'),
+              )
+
+      ), // Showing progress indicator if users list is empty
     );
   }
 }
